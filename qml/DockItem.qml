@@ -31,6 +31,11 @@ Item {
 
     property bool dragStarted: false
 
+    // Magnification effect properties
+    property real magnificationScale: 1.0
+    property real maxMagnification: 1.2
+    property int animationDuration: 200
+
     signal positionChanged()
     signal released()
     signal pressed(var mouse)
@@ -61,7 +66,19 @@ Item {
         height: control.iconSize
         source: iconName
 
+        // Apply magnification scale
+        scale: magnificationScale
+        transformOrigin: Item.Center
+
         visible: !dragStarted
+
+        // Smooth scale animation
+        Behavior on scale {
+            NumberAnimation {
+                duration: animationDuration
+                easing.type: Easing.OutCubic
+            }
+        }
 
         ColorOverlay {
             id: iconColorize
@@ -120,6 +137,13 @@ Item {
         }
 
         onContainsMouseChanged: {
+            // Apply magnification effect on hover
+            if (containsMouse) {
+                magnificationScale = maxMagnification
+            } else {
+                magnificationScale = 1.0
+            }
+
             if (containsMouse && control.popupText !== "") {
                 popupTips.popupText = control.popupText
 
