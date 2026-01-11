@@ -20,6 +20,8 @@
 #include "processprovider.h"
 #include <QDBusInterface>
 #include <QDBusPendingCall>
+#include <QDebug>
+#include <QProcess>
 
 ProcessProvider::ProcessProvider(QObject *parent)
     : QObject(parent)
@@ -38,5 +40,10 @@ bool ProcessProvider::startDetached(const QString &exec, QStringList args)
         return true;
     }
 
+    if (QProcess::startDetached(exec, args)) {
+        return true;
+    }
+
+    qWarning() << "ProcessProvider: failed to launch" << exec << args;
     return false;
 }

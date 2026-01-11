@@ -21,6 +21,7 @@
 #define SYSTEMAPPMONITOR_H
 
 #include <QObject>
+#include <QStringList>
 #include "systemappitem.h"
 
 class SystemAppMonitor : public QObject
@@ -46,6 +47,7 @@ private:
 
 private:
     QList<SystemAppItem *> m_items;
+    QStringList m_directories;
 };
 
 #endif // SYSTEMAPPMONITOR_H

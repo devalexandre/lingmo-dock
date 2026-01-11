@@ -24,8 +24,10 @@
 #include <QDirIterator>
 #include <QSettings>
 #include <QLocale>
-
-#define SystemApplicationsFolder "/usr/share/applications"
+#include <QDir>
+#include <QFile>
+#include <QStandardPaths>
+#include <QSet>
 
 static SystemAppMonitor *SELF = nullptr;
 
@@ -51,7 +53,29 @@ SystemAppMonitor::SystemAppMonitor(QObject *parent)
     : QObject(parent)
 {
     QFileSystemWatcher *watcher = new QFileSystemWatcher(this);
-    watcher->addPath(SystemApplicationsFolder);
+    QStringList directories = QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation);
+    directories << QStringLiteral("/usr/share/applications");
+    directories.removeDuplicates();
+
+    for (const QString &dirPath : qAsConst(directories)) {
+        if (dirPath.isEmpty())
+            continue;
+
+        QString normalized = QDir(dirPath).canonicalPath();
+        if (normalized.isEmpty())
+            normalized = QDir(dirPath).absolutePath();
+
+        if (normalized.isEmpty())
+            continue;
+
+        if (m_directories.contains(normalized))
+            continue;
+
+        m_directories.append(normalized);
+        if (QDir(normalized).exists())
+            watcher->addPath(normalized);
+    }
+
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &SystemAppMonitor::refresh);
     refresh();
 }
@@ -78,27 +102,36 @@ void SystemAppMonitor::refresh()
         addedEntries.append(item->path);
 
     QStringList allEntries;
-    QDirIterator it(SystemApplicationsFolder, { "*.desktop" }, QDir::NoFilter, QDirIterator::Subdirectories);
+    QSet<QString> seenEntries;
 
-    while (it.hasNext()) {
-        const QString &filePath = it.next();
-
-        if (!QFile::exists(filePath))
+    for (const QString &dirPath : qAsConst(m_directories)) {
+        if (dirPath.isEmpty())
             continue;
 
-        allEntries.append(filePath);
+        QDirIterator it(dirPath, { "*.desktop" }, QDir::Files, QDirIterator::Subdirectories);
+
+        while (it.hasNext()) {
+            QString filePath = QDir::cleanPath(it.next());
+
+            if (!QFile::exists(filePath))
+                continue;
+
+            if (seenEntries.contains(filePath))
+                continue;
+
+            seenEntries.insert(filePath);
+            allEntries.append(filePath);
+        }
     }
 
     for (const QString &filePath : allEntries) {
-        if (!addedEntries.contains(filePath)) {
+        if (!addedEntries.contains(filePath))
             addApplication(filePath);
-        }
     }
 
     for (SystemAppItem *item : m_items) {
-        if (!allEntries.contains(item->path)) {
+        if (!allEntries.contains(item->path))
             removeApplication(item);
-        }
     }
 
     emit refreshed();
