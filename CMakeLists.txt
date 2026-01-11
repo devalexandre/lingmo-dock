@@ -47,7 +47,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt6::Widgets
         Qt6::Quick
         Qt6::QuickControls2
-        Qt6::GuiPrivate
         Qt6::Concurrent
         Qt6::DBus
         KF6::WindowSystem
