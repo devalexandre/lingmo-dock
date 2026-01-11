@@ -33,25 +33,27 @@ ProcessProvider::ProcessProvider(QObject *parent)
 
 bool ProcessProvider::startDetached(const QString &exec, QStringList args)
 {
-    auto bus = QDBusConnection::sessionBus();
-    bool sessionAvailable = false;
-    if (bus.interface()) {
-        sessionAvailable = bus.interface()->isServiceRegistered(QStringLiteral("com.lingmo.Session"));
-    }
-
-    QDBusInterface iface("com.lingmo.Session",
-                         "/Session",
-                         "com.lingmo.Session", bus);
-
-    if (sessionAvailable && iface.isValid()) {
-        QDBusPendingReply<> reply = iface.asyncCall(QStringLiteral("launch"), exec, args);
-        reply.waitForFinished();
-        if (!reply.isError())
-            return true;
+    if (exec.isEmpty()) {
+        qWarning() << "ProcessProvider: empty exec";
+        return false;
     }
 
     if (QProcess::startDetached(exec, args)) {
         return true;
+    }
+
+    auto bus = QDBusConnection::sessionBus();
+    if (bus.interface()
+        && bus.interface()->isServiceRegistered(QStringLiteral("com.lingmo.Session"))) {
+        QDBusInterface iface("com.lingmo.Session",
+                             "/Session",
+                             "com.lingmo.Session", bus);
+        if (iface.isValid()) {
+            QDBusPendingReply<> reply = iface.asyncCall(QStringLiteral("launch"), exec, args);
+            reply.waitForFinished();
+            if (!reply.isError())
+                return true;
+        }
     }
 
     qWarning() << "ProcessProvider: failed to launch" << exec << args;
