@@ -22,9 +22,11 @@
 
 #include <QTimer>
 #include <QDebug>
-#include <QtGui/private/qtx11extras_p.h>
+#include <QGuiApplication>
+#include <QtGui/qguiapplication_platform.h>
 #include <QWindow>
 #include <QScreen>
+#include <xcb/xcb.h>
 
 #include <KWindowEffects>
 #include <KWindowSystem>
@@ -35,6 +37,37 @@
 #include <NETWM>
 
 static XWindowInterface *INSTANCE = nullptr;
+
+static xcb_connection_t *x11Connection()
+{
+#if QT_CONFIG(xcb)
+    if (auto native = qApp->nativeInterface<QNativeInterface::QX11Application>()) {
+        return native->connection();
+    }
+#endif
+    return nullptr;
+}
+
+static xcb_window_t x11RootWindow()
+{
+#if QT_CONFIG(xcb)
+    xcb_connection_t *connection = x11Connection();
+    if (!connection)
+        return XCB_WINDOW_NONE;
+
+    const xcb_setup_t *setup = xcb_get_setup(connection);
+    if (!setup)
+        return XCB_WINDOW_NONE;
+
+    xcb_screen_iterator_t it = xcb_setup_roots_iterator(setup);
+    if (it.rem < 1 || !it.data)
+        return XCB_WINDOW_NONE;
+
+    return it.data->root;
+#else
+    return XCB_WINDOW_NONE;
+#endif
+}
 
 XWindowInterface *XWindowInterface::instance()
 {
@@ -70,7 +103,11 @@ void XWindowInterface::minimizeWindow(WId win)
 void XWindowInterface::closeWindow(WId id)
 {
     // FIXME: Why there is no such thing in KWindowSystem??
-    NETRootInfo(QX11Info::connection(), NET::CloseWindow).closeWindowRequest(id);
+    xcb_connection_t *connection = x11Connection();
+    if (!connection)
+        return;
+
+    NETRootInfo(connection, NET::CloseWindow).closeWindowRequest(id);
 }
 
 void XWindowInterface::forceActiveWindow(WId win)
@@ -131,7 +168,7 @@ bool XWindowInterface::isAcceptableWindow(quint64 wid)
 
     // WM_TRANSIENT_FOR hint not set - normal window
     WId transFor = info.transientFor();
-    if (transFor == 0 || transFor == wid || transFor == (WId) QX11Info::appRootWindow())
+    if (transFor == 0 || transFor == wid || transFor == (WId) x11RootWindow())
         return true;
 
     info = KWindowInfo(transFor, NET::WMWindowType);
@@ -203,19 +240,33 @@ void XWindowInterface::startInitWindows()
 QString XWindowInterface::desktopFilePath(quint64 wid)
 {
     const KWindowInfo info(wid, NET::Properties(), NET::WM2WindowClass | NET::WM2DesktopFileName);
+    xcb_connection_t *connection = x11Connection();
+    const xcb_window_t rootWindow = x11RootWindow();
+    quint32 pid = 0;
+
+    if (connection && rootWindow != XCB_WINDOW_NONE) {
+        pid = NETWinInfo(connection,
+                         wid,
+                         rootWindow,
+                         NET::WMPid,
+                         NET::Properties2()).pid();
+    }
+
     return Utils::instance()->desktopPathFromMetadata(info.windowClassClass(),
-                                                      NETWinInfo(QX11Info::connection(), wid,
-                                                                 QX11Info::appRootWindow(),
-                                                                 NET::WMPid,
-                                                                 NET::Properties2()).pid(),
+                                                      pid,
                                                       info.windowClassName());
 }
 
 void XWindowInterface::setIconGeometry(quint64 wid, const QRect &rect)
 {
-    NETWinInfo info(QX11Info::connection(),
+    xcb_connection_t *connection = x11Connection();
+    const xcb_window_t rootWindow = x11RootWindow();
+    if (!connection || rootWindow == XCB_WINDOW_NONE)
+        return;
+
+    NETWinInfo info(connection,
                     wid,
-                    (WId) QX11Info::appRootWindow(),
+                    rootWindow,
                     NET::WMIconGeometry,
                     QFlags<NET::Property2>(1));
     NETRect nrect;
