@@ -11,7 +11,7 @@ Item {
     visible: true
 
     property bool isHorizontal: Settings.direction === DockSettings.Bottom
-    property real windowRadius: isHorizontal ? root.height * 0.3 : root.width * 0.3
+    property real windowRadius: isHorizontal ? root.height * 0.4 : root.width * 0.4
     property bool compositing: windowHelper.compositing
 
     onCompositingChanged: {
@@ -33,12 +33,9 @@ Item {
 
         anchors.fill: parent
         radius: root.compositing && Settings.style === 0 ? windowRadius : 0
-        // color: LingmoUI.Theme.darkMode ? "#333333" : "#F2F2F2"
-        // opacity: LingmoUI.Theme.darkMode ? 0.5 : 0.4
-        opacity: windowHelper.compositing ? LingmoUI.Theme.darkMode ? 0.5 : 0.4 : 1
-        color: LingmoUI.Theme.darkMode ? "#666666" : "#E6E6E6"
-        // opacity: root.compositing ? LingmoUI.Theme.darkMode ? 0.5 : 0.5 : 0.9
-        // opacity: 0.8
+        // Modern macOS-like translucent background
+        opacity: windowHelper.compositing ? 0.7 : 1
+        color: LingmoUI.Theme.darkMode ? "#444444" : "#FFFFFF"
         border.width: 1 / LingmoUI.Units.devicePixelRatio
         border.pixelAligned: LingmoUI.Units.devicePixelRatio > 1 ? false : true
         border.color: borderColor
