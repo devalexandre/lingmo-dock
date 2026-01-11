@@ -29,6 +29,7 @@
 #include <QQmlProperty>
 #include <QQuickItem>
 #include <QMetaEnum>
+#include <QLibraryInfo>
 
 #include <NETWM>
 #include <KWindowSystem>
@@ -62,6 +63,8 @@ MainWindow::MainWindow(QQuickView *parent)
     engine()->rootContext()->setContextProperty("Settings", m_settings);
     engine()->rootContext()->setContextProperty("mainWindow", this);
     engine()->rootContext()->setContextProperty("trash", m_trashManager);
+
+    engine()->addImportPath(QLibraryInfo::path(QLibraryInfo::QmlImportsPath));
 
     setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     setScreen(qApp->primaryScreen());
