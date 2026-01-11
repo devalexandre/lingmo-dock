@@ -13,6 +13,8 @@ Item {
     property bool isHorizontal: Settings.direction === DockSettings.Bottom
     property real windowRadius: isHorizontal ? root.height * 0.35 : root.width * 0.35
     property bool compositing: windowHelper.compositing
+    property bool roundedEnabled: Settings.roundedWindowEnabled
+                                 && Settings.style === DockSettings.Round
 
     onCompositingChanged: {
         mainWindow.updateSize()
@@ -32,8 +34,10 @@ Item {
                                                                                                                            : Qt.rgba(0, 0, 0, 0.15)
 
         anchors.fill: parent
-        radius: root.compositing && Settings.style === 0 ? windowRadius : 0
-        opacity: windowHelper.compositing ? LingmoUI.Theme.darkMode ? 0.65 : 0.75 : 1
+        radius: roundedEnabled ? windowRadius : 0
+        opacity: windowHelper.compositing ? LingmoUI.Theme.darkMode ? 0.65 : 0.75
+                                          : roundedEnabled ? LingmoUI.Theme.darkMode ? 0.9 : 0.95
+                                                           : 1
         color: LingmoUI.Theme.darkMode ? "#2A2A2A" : "#DCDCDC"
         border.width: 1 / LingmoUI.Units.devicePixelRatio
         border.pixelAligned: LingmoUI.Units.devicePixelRatio > 1 ? false : true

@@ -23,6 +23,8 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QDBusConnection>
+#include <QIcon>
+#include <QStandardPaths>
 
 #include "applicationmodel.h"
 #include "mainwindow.h"
@@ -30,6 +32,27 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+    if (QIcon::themeName().isEmpty()) {
+        const QStringList candidates = {
+            QStringLiteral("lingmo"),
+            QStringLiteral("Lingmo"),
+            QStringLiteral("breeze"),
+            QStringLiteral("hicolor")
+        };
+
+        for (const QString &candidate : candidates) {
+            const QString themePath = QStandardPaths::locate(
+                QStandardPaths::GenericDataLocation,
+                QStringLiteral("icons/%1/index.theme").arg(candidate),
+                QStandardPaths::LocateFile);
+            if (!themePath.isEmpty()) {
+                QIcon::setThemeName(candidate);
+                break;
+            }
+        }
+    }
 
     if (!QDBusConnection::sessionBus().registerService("com.lingmo.Dock")) {
         return -1;
