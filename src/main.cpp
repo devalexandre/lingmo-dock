@@ -25,6 +25,7 @@
 #include <QDBusConnection>
 #include <QIcon>
 #include <QStandardPaths>
+#include <QStringList>
 
 #include "applicationmodel.h"
 #include "mainwindow.h"
@@ -33,9 +34,20 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+    QString cruleThemePath = QStandardPaths::locate(
+        QStandardPaths::GenericDataLocation,
+        QStringLiteral("icons/Crule/index.theme"),
+        QStandardPaths::LocateFile);
+
+    if (!cruleThemePath.isEmpty())
+        QIcon::setFallbackThemeName(QStringLiteral("Crule"));
+    else
+        QIcon::setFallbackThemeName(QStringLiteral("hicolor"));
+
     if (QIcon::themeName().isEmpty()) {
         const QStringList candidates = {
+            QStringLiteral("Crule"),
+            QStringLiteral("crule"),
             QStringLiteral("lingmo"),
             QStringLiteral("Lingmo"),
             QStringLiteral("breeze"),

@@ -21,6 +21,7 @@
 #include <QDBusInterface>
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
+#include <QDBusConnectionInterface>
 #include <QDebug>
 #include <QProcess>
 
@@ -32,11 +33,17 @@ ProcessProvider::ProcessProvider(QObject *parent)
 
 bool ProcessProvider::startDetached(const QString &exec, QStringList args)
 {
+    auto bus = QDBusConnection::sessionBus();
+    bool sessionAvailable = false;
+    if (bus.interface()) {
+        sessionAvailable = bus.interface()->isServiceRegistered(QStringLiteral("com.lingmo.Session"));
+    }
+
     QDBusInterface iface("com.lingmo.Session",
                          "/Session",
-                         "com.lingmo.Session", QDBusConnection::sessionBus());
+                         "com.lingmo.Session", bus);
 
-    if (iface.isValid()) {
+    if (sessionAvailable && iface.isValid()) {
         QDBusPendingReply<> reply = iface.asyncCall(QStringLiteral("launch"), exec, args);
         reply.waitForFinished();
         if (!reply.isError())
