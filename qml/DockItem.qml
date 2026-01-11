@@ -115,7 +115,7 @@ Item {
             popupTips.hide()
         }
 
-        onPositionChanged: {
+        onPositionChanged: function(mouse) {
             if (pressed) {
                 if (control.draggable && mouse.source !== Qt.MouseEventSynthesizedByQt) {
                     drag.target = icon
