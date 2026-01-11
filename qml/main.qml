@@ -33,8 +33,8 @@ Item {
 
         anchors.fill: parent
         radius: root.compositing && Settings.style === 0 ? windowRadius : 0
-        opacity: windowHelper.compositing ? 0.3 : 1
-        color: LingmoUI.Theme.darkMode ? "#555555" : "#FFFFFF"
+        opacity: windowHelper.compositing ? LingmoUI.Theme.darkMode ? 0.65 : 0.75 : 1
+        color: LingmoUI.Theme.darkMode ? "#2A2A2A" : "#DCDCDC"
         border.width: 1 / LingmoUI.Units.devicePixelRatio
         border.pixelAligned: LingmoUI.Units.devicePixelRatio > 1 ? false : true
         border.color: borderColor
