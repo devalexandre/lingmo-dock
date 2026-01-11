@@ -10,7 +10,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 CONFIG REQUIRED Widgets DBus Gui Concurrent LinguistTools QuickControls2)
+find_package(Qt6 CONFIG REQUIRED Widgets DBus Gui GuiPrivate Concurrent LinguistTools QuickControls2)
 
 find_package(KF6WindowSystem REQUIRED)
 
