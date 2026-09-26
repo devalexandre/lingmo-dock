@@ -395,6 +395,12 @@ void MainWindow::followPrimaryScreen()
     if (screen() != primary)
         setScreen(primary);
     resizeWindow();
+
+    // The strip along the screen edge that brings a hidden dock back
+    if (m_fakeWindow) {
+        m_fakeWindow->setScreen(primary);
+        m_fakeWindow->updateGeometry();
+    }
 }
 
 void MainWindow::onPositionChanged()
