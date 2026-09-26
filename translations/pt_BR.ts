@@ -4,7 +4,7 @@
 <context>
     <name>AppItem</name>
     <message>
-        <location filename="../qml/AppItem.qml" line="+76"/>
+        <location filename="../qml/AppItem.qml" line="+77"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
@@ -32,15 +32,23 @@
 <context>
     <name>ApplicationModel</name>
     <message>
-        <location filename="../src/applicationmodel.cpp" line="+389"/>
+        <location filename="../src/applicationmodel.cpp" line="+399"/>
         <source>Launcher</source>
         <translation>Lançador</translation>
     </message>
 </context>
 <context>
+    <name>WindowPreview</name>
+    <message>
+        <location filename="../qml/WindowPreview.qml" line="+358"/>
+        <source>Close window</source>
+        <translation>Fechar janela</translation>
+    </message>
+</context>
+<context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="+118"/>
+        <location filename="../qml/main.qml" line="+125"/>
         <source>Trash</source>
         <translation>Lixeira</translation>
     </message>
