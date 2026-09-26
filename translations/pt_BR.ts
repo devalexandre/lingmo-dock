@@ -4,27 +4,27 @@
 <context>
     <name>AppItem</name>
     <message>
-        <location filename="../qml/AppItem.qml" line="76"/>
+        <location filename="../qml/AppItem.qml" line="+76"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
     <message>
-        <location filename="../qml/AppItem.qml" line="88"/>
+        <location line="+14"/>
         <source>Unpin</source>
         <translation>Desafixar</translation>
     </message>
     <message>
-        <location filename="../qml/AppItem.qml" line="88"/>
+        <location line="+0"/>
         <source>Pin</source>
         <translation>Fixar</translation>
     </message>
     <message>
-        <location filename="../qml/AppItem.qml" line="97"/>
+        <location line="+11"/>
         <source>Close window</source>
         <translation>Fechar janela</translation>
     </message>
     <message>
-        <location filename="../qml/AppItem.qml" line="98"/>
+        <location line="+1"/>
         <source>Close %1 windows</source>
         <translation>Fechar %1 janelas</translation>
     </message>
@@ -32,25 +32,25 @@
 <context>
     <name>ApplicationModel</name>
     <message>
-        <location filename="../src/applicationmodel.cpp" line="360"/>
+        <location filename="../src/applicationmodel.cpp" line="+389"/>
         <source>Launcher</source>
-        <translation>Inicializador</translation>
+        <translation>Lançador</translation>
     </message>
 </context>
 <context>
     <name>main</name>
     <message>
-        <location filename="../qml/main.qml" line="118"/>
+        <location filename="../qml/main.qml" line="+118"/>
         <source>Trash</source>
         <translation>Lixeira</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="153"/>
+        <location line="+35"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
     <message>
-        <location filename="../qml/main.qml" line="158"/>
+        <location line="+6"/>
         <source>Empty Trash</source>
         <translation>Esvaziar Lixeira</translation>
     </message>
