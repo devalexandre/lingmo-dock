@@ -12,6 +12,7 @@ DockItem {
     iconName: model.iconName ? model.iconName : "application-x-desktop"
     isActive: model.isActive
     popupText: model.visibleName
+    previewAppId: windowCount > 0 && !model.fixed ? model.appId : ""
     enableActivateDot: windowCount !== 0
     draggable: !model.fixed
     dragItemIndex: index

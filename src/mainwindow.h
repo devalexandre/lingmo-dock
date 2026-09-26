@@ -28,6 +28,7 @@
 #include "applicationmodel.h"
 #include "fakewindow.h"
 #include "trashmanager.h"
+#include "windowpreviewmodel.h"
 
 class MainWindow : public QQuickView
 {
@@ -59,6 +60,9 @@ public:
     void setStyle(int style);
 
     Q_INVOKABLE void updateSize();
+
+    // The window preview popup is open: an auto-hiding dock stays up meanwhile
+    Q_INVOKABLE void setPreviewVisible(bool visible);
 
 signals:
     void resizingFished();
@@ -99,8 +103,10 @@ private:
     ApplicationModel *m_appModel;
     FakeWindow *m_fakeWindow;
     TrashManager *m_trashManager;
+    WindowPreviewModel *m_windowPreviews;
 
     bool m_hideBlocked;
+    bool m_previewVisible;
 
     QTimer *m_showTimer;
     QTimer *m_relayout = nullptr;

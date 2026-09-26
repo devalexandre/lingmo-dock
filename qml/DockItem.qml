@@ -25,6 +25,8 @@ Item {
     property bool isActive: false
 
     property var popupText
+    // Set when the item has windows to preview instead of the name tooltip
+    property string previewAppId: ""
 
     property double iconSizeRatio: 0.8
     property var iconName
@@ -120,6 +122,7 @@ Item {
         onPressed: function(mouse) {
             control.pressed(mouse)
             popupTips.hide()
+            windowPreview.hideNow()
         }
 
         onPositionChanged: function(mouse) {
@@ -151,7 +154,12 @@ Item {
                 magnificationScale = 1.0
             }
 
-            if (containsMouse && control.popupText !== "") {
+            if (containsMouse && control.previewAppId !== "" && !control.dragStarted) {
+                popupTips.hide()
+                windowPreview.requestShow(control, control.previewAppId, control.iconName)
+            } else if (containsMouse && control.popupText !== "") {
+                windowPreview.hideNow()
+
                 popupTips.popupText = control.popupText
 
                 if (Settings.direction === DockSettings.Left)
@@ -166,7 +174,11 @@ Item {
 
                 popupTips.show()
             } else {
-                popupTips.hide()
+                // The next icon may have been entered before this one was left:
+                // only take down what this icon put up
+                if (popupTips.popupText === control.popupText)
+                    popupTips.hide()
+                windowPreview.requestHide(control)
             }
         }
     }

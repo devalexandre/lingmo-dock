@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Window 2.12
 import Qt5Compat.GraphicalEffects
 
 import Lingmo.Dock 1.0
@@ -73,6 +74,12 @@ Item {
         id: popupTips
         backgroundColor: _background.color
         blurEnabled: false
+    }
+
+    WindowPreview {
+        id: windowPreview
+        screenRect: Qt.rect(root.Screen.virtualX, root.Screen.virtualY,
+                            root.Screen.width, root.Screen.height)
     }
 
     GridLayout {
@@ -170,6 +177,7 @@ Item {
 
         function onDirectionChanged() {
             popupTips.hide()
+            windowPreview.hideNow()
         }
     }
 
@@ -178,6 +186,7 @@ Item {
 
         function onVisibleChanged() {
             popupTips.hide()
+            windowPreview.hideNow()
         }
     }
 }

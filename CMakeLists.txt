@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 CONFIG REQUIRED Widgets DBus Gui GuiPrivate Concurrent LinguistTools QuickControls2)
-find_package(XCB REQUIRED)
+find_package(XCB REQUIRED COMPONENTS XCB XFIXES COMPOSITE RENDER)
 
 find_package(KF6WindowSystem REQUIRED)
 
@@ -29,6 +29,8 @@ set(SRCS
     src/utils.cpp
     src/xwindowinterface.cpp
     src/activity.cpp
+    src/windowpreviewmodel.cpp
+    src/windowthumbnail.cpp
 
     src/fakewindow.cpp
 )
@@ -52,6 +54,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Qt6::DBus
         KF6::WindowSystem
         XCB::XCB
+        XCB::COMPOSITE
+        XCB::RENDER
 )
 
 file(GLOB TS_FILES translations/*.ts)

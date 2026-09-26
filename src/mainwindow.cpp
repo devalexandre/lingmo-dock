@@ -43,7 +43,9 @@ MainWindow::MainWindow(QQuickView *parent)
     , m_appModel(new ApplicationModel)
     , m_fakeWindow(nullptr)
     , m_trashManager(new TrashManager)
+    , m_windowPreviews(new WindowPreviewModel(m_appModel, this))
     , m_hideBlocked(false)
+    , m_previewVisible(false)
     , m_showTimer(new QTimer(this))
     , m_hideTimer(new QTimer(this))
 {
@@ -63,6 +65,8 @@ MainWindow::MainWindow(QQuickView *parent)
     engine()->rootContext()->setContextProperty("Settings", m_settings);
     engine()->rootContext()->setContextProperty("mainWindow", this);
     engine()->rootContext()->setContextProperty("trash", m_trashManager);
+    engine()->rootContext()->setContextProperty("windowPreviews", m_windowPreviews);
+    engine()->addImageProvider("windowthumbnail", new WindowThumbnailProvider(m_windowPreviews->store()));
 
 
     setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
@@ -181,6 +185,21 @@ void MainWindow::setStyle(int style)
 void MainWindow::updateSize()
 {
     resizeWindow();
+}
+
+void MainWindow::setPreviewVisible(bool visible)
+{
+    if (m_previewVisible == visible)
+        return;
+
+    m_previewVisible = visible;
+
+    if (visible) {
+        m_hideTimer->stop();
+    } else if (m_fakeWindow && !m_hideBlocked) {
+        // The pointer left through the popup, not the dock
+        m_hideTimer->start();
+    }
 }
 
 QRect MainWindow::windowRect() const
@@ -466,7 +485,7 @@ void MainWindow::onVisibilityChanged()
         clearViewStruts();
         setGeometry(windowRect());
 
-        if (m_activity->existsWindowMaximized() && !m_hideBlocked) {
+        if (m_activity->existsWindowMaximized() && !m_hideBlocked && !m_previewVisible) {
             setVisible(false);
         } else {
             setVisible(true);
@@ -490,7 +509,7 @@ void MainWindow::onVisibilityChanged()
 
 void MainWindow::onHideTimeout()
 {
-    if (m_activity->launchPad())
+    if (m_activity->launchPad() || m_previewVisible)
         return;
 
     if (m_settings->visibility() == DockSettings::IntellHide
@@ -510,7 +529,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *e)
         m_hideBlocked = true;
         break;
     case QEvent::Leave:
-        if (m_fakeWindow)
+        if (m_fakeWindow && !m_previewVisible)
             m_hideTimer->start();
         m_hideBlocked = false;
         break;

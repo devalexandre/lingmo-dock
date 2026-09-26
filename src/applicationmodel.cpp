@@ -151,6 +151,16 @@ bool ApplicationModel::isDesktopPinned(const QString &desktopFile)
     return false;
 }
 
+QList<quint64> ApplicationModel::windowIds(const QString &id)
+{
+    ApplicationItem *item = findItemById(id);
+
+    if (!item)
+        return QList<quint64>();
+
+    return item->wids;
+}
+
 void ApplicationModel::clicked(const QString &id)
 {
     ApplicationItem *item = findItemById(id);

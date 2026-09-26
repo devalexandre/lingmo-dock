@@ -52,6 +52,9 @@ public:
     bool desktopContains(const QString &desktopFile);
     bool isDesktopPinned(const QString &desktopFile);
 
+    // The item's windows, oldest first
+    QList<quint64> windowIds(const QString &id);
+
     Q_INVOKABLE void save() { savePinAndUnPinList(); }
 
     Q_INVOKABLE void clicked(const QString &id);
