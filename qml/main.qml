@@ -151,11 +151,13 @@ Item {
 
                 MenuItem {
                     text: qsTr("Open")
+                    icon.name: "folder-open"
                     onTriggered: trash.openTrash()
                 }
 
                 MenuItem {
                     text: qsTr("Empty Trash")
+                    icon.name: "trash-empty"
                     onTriggered: trash.emptyTrash()
                     // visible: trash.count !== 0
                 }

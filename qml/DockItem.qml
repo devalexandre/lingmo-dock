@@ -91,14 +91,21 @@ Item {
 
     DropArea {
         id: iconDropArea
-        anchors.fill: icon
+        anchors.centerIn: parent
+        width: control.iconSize
+        height: control.iconSize
         enabled: draggable
         onDropped: control.dropped(drop)
     }
 
     MouseArea {
         id: iconArea
-        anchors.fill: icon
+        // Sized from iconSize rather than anchors.fill: icon. Items created while
+        // the dock was still 0px wide (the launcher, the trash) kept a 0x0 mouse
+        // area with the anchor, so they never received clicks.
+        anchors.centerIn: parent
+        width: control.iconSize
+        height: control.iconSize
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         drag.axis: Drag.XAndYAxis
@@ -148,7 +155,7 @@ Item {
                 popupTips.popupText = control.popupText
 
                 if (Settings.direction === DockSettings.Left)
-                    popupTips.position = Qt.point(root.width + LingmoUI.Units.largeSpacing,
+                    popupTips.position = Qt.point(root.mapToGlobal(root.width, 0).x + LingmoUI.Units.largeSpacing,
                                                   control.mapToGlobal(0, 0).y + (control.height / 2 - popupTips.height / 2))
                 else if (Settings.direction === DockSettings.Right)
                     popupTips.position = Qt.point(control.mapToGlobal(0, 0).x - popupTips.width - LingmoUI.Units.smallSpacing / 2,

@@ -74,18 +74,21 @@ DockItem {
 
         MenuItem {
             text: qsTr("Open")
+            icon.name: "document-open"
             visible: windowCount === 0
             onTriggered: appModel.openNewInstance(model.appId)
         }
 
         MenuItem {
             text: model.visibleName
+            icon.name: appItem.iconName.startsWith("qrc:") ? "" : appItem.iconName
             visible: windowCount > 0 && model.visibleName
             onTriggered: appModel.openNewInstance(model.appId)
         }
 
         MenuItem {
             text: model.isPinned ? qsTr("Unpin") : qsTr("Pin")
+            icon.name: model.isPinned ? "window-unpin" : "window-pin"
             visible: model.desktopFile !== ""
             onTriggered: {
                 model.isPinned ? appModel.unPin(model.appId) : appModel.pin(model.appId)
@@ -94,6 +97,7 @@ DockItem {
 
         MenuItem {
             visible: windowCount !== 0
+            icon.name: "window-close"
             text: windowCount === 1 ? qsTr("Close window")
                                     : qsTr("Close %1 windows").arg(windowCount)
             onTriggered: appModel.closeAllByAppId(model.appId)

@@ -64,7 +64,6 @@ MainWindow::MainWindow(QQuickView *parent)
     engine()->rootContext()->setContextProperty("mainWindow", this);
     engine()->rootContext()->setContextProperty("trash", m_trashManager);
 
-    engine()->addImportPath(QLibraryInfo::path(QLibraryInfo::QmlImportsPath));
 
     setSource(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     setScreen(qApp->primaryScreen());
@@ -97,6 +96,11 @@ MainWindow::MainWindow(QQuickView *parent)
     connect(m_settings, &DockSettings::iconSizeChanged, this, &MainWindow::onIconSizeChanged);
     connect(m_settings, &DockSettings::visibilityChanged, this, &MainWindow::onVisibilityChanged);
     connect(m_settings, &DockSettings::styleChanged, this, &MainWindow::resizeWindow);
+
+    // The primary screen may have changed while the QML above was loading: the session
+    // runs autostart entries (xrandr layouts, ...) as soon as the desktop is up
+    if (screen() != qApp->primaryScreen())
+        onPrimaryScreenChanged(qApp->primaryScreen());
 }
 
 MainWindow::~MainWindow()
@@ -360,6 +364,11 @@ void MainWindow::deleteFakeWindow()
 
 void MainWindow::onPrimaryScreenChanged(QScreen *screen)
 {
+    // Follow the geometry of the new screen, not the old one
+    disconnect(this->screen(), nullptr, this, nullptr);
+    connect(screen, &QScreen::virtualGeometryChanged, this, &MainWindow::resizeWindow);
+    connect(screen, &QScreen::geometryChanged, this, &MainWindow::resizeWindow);
+
     initScreens();
     setScreen(screen);
     resizeWindow();
