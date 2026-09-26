@@ -185,7 +185,7 @@ void XWindowInterface::setViewStruts(QWindow *view, DockSettings::Direction dire
 {
     NETExtendedStrut strut;
 
-    const auto screen = view->screen();
+    const auto screen = qApp->primaryScreen() ? qApp->primaryScreen() : view->screen();
 
     // const QRect currentScreen {screen->geometry()};
     const QRect wholeScreen { {0, 0}, screen->virtualSize() };

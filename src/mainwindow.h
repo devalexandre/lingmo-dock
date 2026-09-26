@@ -81,6 +81,8 @@ private:
 
 private slots:
     void onPrimaryScreenChanged(QScreen *screen);
+    // Back on the primary screen, wherever it is now
+    void followPrimaryScreen();
     void onPositionChanged();
     void onIconSizeChanged();
     void onVisibilityChanged();
@@ -101,6 +103,7 @@ private:
     bool m_hideBlocked;
 
     QTimer *m_showTimer;
+    QTimer *m_relayout = nullptr;
     QTimer *m_hideTimer;
 };
 

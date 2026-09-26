@@ -86,10 +86,27 @@ MainWindow::MainWindow(QQuickView *parent)
     connect(m_activity, &Activity::launchPadChanged, this, &MainWindow::onVisibilityChanged);
     connect(m_activity, &Activity::existsWindowMaximizedChanged, this, &MainWindow::onVisibilityChanged);
 
-    // Screen change.
+    // Always on the primary screen. Monitors moved, rotated, plugged in or made primary
+    // change several screens at once, and KWin may move the dock while they settle
+    // (which makes Qt think it now lives on another screen), so every such change just
+    // schedules one look at where the primary screen is now.
+    m_relayout = new QTimer(this);
+    m_relayout->setSingleShot(true);
+    m_relayout->setInterval(250);
+    connect(m_relayout, &QTimer::timeout, this, &MainWindow::followPrimaryScreen);
+    auto watch = [this](QScreen *screen) {
+        connect(screen, &QScreen::geometryChanged, m_relayout, qOverload<>(&QTimer::start));
+        connect(screen, &QScreen::virtualGeometryChanged, m_relayout, qOverload<>(&QTimer::start));
+    };
+    for (QScreen *screen : qGuiApp->screens())
+        watch(screen);
+    connect(qGuiApp, &QGuiApplication::screenAdded, this, [this, watch](QScreen *screen) {
+        watch(screen);
+        m_relayout->start();
+    });
+    connect(qGuiApp, &QGuiApplication::screenRemoved, m_relayout, qOverload<>(&QTimer::start));
     connect(qGuiApp, &QGuiApplication::primaryScreenChanged, this, &MainWindow::onPrimaryScreenChanged);
-    connect(screen(), &QScreen::virtualGeometryChanged, this, &MainWindow::resizeWindow);
-    connect(screen(), &QScreen::geometryChanged, this, &MainWindow::resizeWindow);
+    connect(this, &QWindow::screenChanged, m_relayout, qOverload<>(&QTimer::start));
 
     connect(m_appModel, &ApplicationModel::countChanged, this, &MainWindow::resizeWindow);
     connect(m_settings, &DockSettings::directionChanged, this, &MainWindow::onPositionChanged);
@@ -99,8 +116,7 @@ MainWindow::MainWindow(QQuickView *parent)
 
     // The primary screen may have changed while the QML above was loading: the session
     // runs autostart entries (xrandr layouts, ...) as soon as the desktop is up
-    if (screen() != qApp->primaryScreen())
-        onPrimaryScreenChanged(qApp->primaryScreen());
+    followPrimaryScreen();
 }
 
 MainWindow::~MainWindow()
@@ -169,8 +185,11 @@ void MainWindow::updateSize()
 
 QRect MainWindow::windowRect() const
 {
-    const QRect screenGeometry = screen()->geometry();
-    const QRect availableGeometry = screen()->availableGeometry();
+    // The primary screen's, not screen(): Qt moves that to whichever screen the window
+    // happens to be over
+    QScreen *primary = qApp->primaryScreen() ? qApp->primaryScreen() : screen();
+    const QRect screenGeometry = primary->geometry();
+    const QRect availableGeometry = primary->availableGeometry();
 
     bool isHorizontal = m_settings->direction() == DockSettings::Bottom;
     bool compositing = false;
@@ -362,15 +381,19 @@ void MainWindow::deleteFakeWindow()
     }
 }
 
-void MainWindow::onPrimaryScreenChanged(QScreen *screen)
+void MainWindow::onPrimaryScreenChanged(QScreen *)
 {
-    // Follow the geometry of the new screen, not the old one
-    disconnect(this->screen(), nullptr, this, nullptr);
-    connect(screen, &QScreen::virtualGeometryChanged, this, &MainWindow::resizeWindow);
-    connect(screen, &QScreen::geometryChanged, this, &MainWindow::resizeWindow);
+    m_relayout->start();
+}
 
+void MainWindow::followPrimaryScreen()
+{
+    QScreen *primary = qApp->primaryScreen();
+    if (!primary)
+        return;
     initScreens();
-    setScreen(screen);
+    if (screen() != primary)
+        setScreen(primary);
     resizeWindow();
 }
 
