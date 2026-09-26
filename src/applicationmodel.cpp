@@ -345,9 +345,37 @@ int ApplicationModel::indexOf(const QString &id)
     return -1;
 }
 
+// Konsole used to be the pinned terminal; once lingmo-terminal is installed it takes
+// Konsole's place, once, so docks set up before the switch follow the new default
+static void migrateTerminalPin(QSettings &pinned)
+{
+    QSettings dock(QSettings::UserScope, "lingmoos", "dock");
+    const QString terminalDesktop = QStringLiteral("/usr/share/applications/lingmo-terminal.desktop");
+    if (dock.value("Migrations/TerminalPin", false).toBool() || !QFile::exists(terminalDesktop))
+        return;
+    dock.setValue("Migrations/TerminalPin", true);
+
+    const QStringList groups = pinned.childGroups();
+    if (!groups.contains("konsole") || groups.contains("lingmo-terminal"))
+        return;
+
+    const int index = pinned.value("konsole/Index").toInt();
+    pinned.remove("konsole");
+    pinned.beginGroup("lingmo-terminal");
+    pinned.setValue("DesktopPath", terminalDesktop);
+    pinned.setValue("Exec", "lingmo-terminal");
+    pinned.setValue("Icon", "utilities-terminal");
+    pinned.setValue("Index", index);
+    pinned.setValue("VisibleName", "Terminal");
+    pinned.endGroup();
+    pinned.sync();
+}
+
 void ApplicationModel::initPinnedApplications()
 {
     QSettings settings(QSettings::UserScope, "lingmoos", "dock_pinned");
+    if (QFile(settings.fileName()).exists())
+        migrateTerminalPin(settings);
     QSettings systemSettings("/etc/lingmo-dock-list.conf", QSettings::IniFormat);
     QSettings *set = (QFile(settings.fileName()).exists()) ? &settings
                                                            : &systemSettings;
